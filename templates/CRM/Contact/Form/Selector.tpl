@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.4                                                |
+ | CiviCRM version 4.3                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2013                                |
  +--------------------------------------------------------------------+
@@ -147,7 +147,11 @@
 <script type="text/javascript">
   {literal}
   cj(function($) {
-    cj("#toggleSelect, input[id^=mark_x_]").removeAttr('checked');
+
+//change by gautam issues-11351
+var cookieValue = jQuery.cookie("sid");
+cj("#toggleSelect, input[id^=mark_x_]").removeAttr('checked');
+cj(cookieValue).attr('checked', 'checked');
     var cids = [];
     var i = 0;
     {/literal}
@@ -159,34 +163,47 @@
     if (cids.length > 0) {
       $('input[name=radio_ts][value=ts_sel]').attr('checked', 'checked');
     }
-    var params = {getCount: cids.length};
+//change by gautam issues-11351
+var count=cj(":checkbox:checked").length;
+    var params = {getCount:count};
     countSelections(params);
     on_load_init_checkboxes("{/literal}{$form.formName}{literal}");
   });
 function countSelections(obj) {
+//change by gautam issues-11351
+var count=cj(":checkbox:checked").length;
   var label = cj('label[for*=ts_sel]');
   if (typeof(obj) == 'undefined') {
     return parseInt(cj('span', label).text());
   }
-  if (obj && typeof(obj.getCount) != 'undefined' && label.length > 0) {
+  if (obj && typeof(count) != 'undefined' && label.length > 0) {
     if (cj('span', label).length < 1) {
-      label.prepend('<span>' + obj.getCount + '</span> ');
+      label.prepend('<span>' + count + '</span> ');
     }
     else {
-      cj('span', label).html(obj.getCount);
+      cj('span', label).html(count);
     }
-    toggleTaskAction(obj.getCount);
+    toggleTaskAction(count);
   }
   on_load_init_checkboxes("{/literal}{$form.formName}{literal}");
 }
 function toggleContactSelection(name, qfKey, selection) {
+var num=name.split("_");
+var temp="";
+var cookieValue = jQuery.cookie("sid");
+temp+=cookieValue+','+'#mark_x_'+num[2];
+jQuery.cookie('sid',temp);
+
   var url = CRM.url('civicrm/ajax/markSelection');
   var params = {qfKey: qfKey};
+
   if (!(cj('#' + name).is(':checked'))) {
     params.action = 'unselect';
     params.state = 'unchecked';
   }
   if (selection == 'multiple') {
+//change by gautam issues-11351
+jQuery.cookie('sid','null');
      var rowArr = new Array( );
      {/literal}{foreach from=$rows item=row  key=keyVal}
      {literal}rowArr[{/literal}{$keyVal}{literal}] = '{/literal}{$row.checkbox}{literal}';
